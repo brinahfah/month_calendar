@@ -1,9 +1,9 @@
 <?php
 //Informations de connexion Supabase
-$host = 'db.cxrokapblsiqryrafisn.supabase.co';//Remplacez par l'hôte de votre base de données
+$host = 'aws-0-eu-west-3.pooler.supabase.com';//Remplacez par l'hôte de votre base de données
 $port = '5432'; // Port par défaut pour PostgreSQL
 $database = 'postgres';
-$user ='postgres' ;  // Nom d'utilisateur
+$user ='postgres.mtamvxsqjgqieeciyhjh' ;  // Nom d'utilisateur
 $password = 'brinahfah23';             // Mot de passe
 
 try{
