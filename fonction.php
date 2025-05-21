@@ -1,7 +1,10 @@
 <?php
 session_start();
 
+
 require_once 'db_connexion.php';
+
+ /** @var PDO $pdo */ //
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $email_saisi = trim($_POST['email']); // C'est cette variable que vous avez définie

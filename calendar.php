@@ -38,9 +38,9 @@
         // Vérifie si l'utilisateur est connecté ET s'il a le rôle "admin"
         if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true && isset($_SESSION['role']) && $_SESSION['role'] == "admin") {
         ?>
-            <a href="ajouter.php"><button>Ajouter</button> </a>
-            <a href="supprimer.php"><button>Créer</button></a> 
-            <a href="create.php"><button>supprimer</button></a>
+            <a href="ajouter.php"><button>Ajouter</button></a>
+            <a href="supprimer.php"><button>supprimer</button></a> 
+            <a href="create.php"><button>Créer</button></a>
             <a href="read.php"><button>Voir le calendrier</button></a> 
         <?php
         } else {
