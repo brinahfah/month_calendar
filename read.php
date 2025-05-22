@@ -50,10 +50,13 @@
 <body>
     <div class="main">
         <?php
+        ini_set('display_errors', 1);
+        ini_set('display_startup_errors', 1);
+        error_reporting(E_ALL);
         session_start();
         require_once 'db_connexion.php';
 
-        /** @var PDO $pdo */ // Annotation PHPDoc pour l'éditeur
+        /** @var PDO $pdo */
 
         $id_personne_a_afficher = null;
         $nom_personne_a_afficher = "du calendrier"; // Texte par défaut pour l'affichage
@@ -71,7 +74,6 @@
         else {
             echo "<h1>Veuillez vous connecter ou sélectionner une personne.</h1>";
             echo "<p>Retour à l'<a href='calendar.php'>accueil</a>.</p>";
-            // Ou header("Location: login.php"); exit(); si tu veux forcer la connexion
             exit(); // Arrête l'exécution si pas d'ID à afficher
         }
 
@@ -120,7 +122,7 @@
                             </option>
                         <?php } ?>
                     </select>
-                    </form>
+                </form>
             </div>
         <?php } ?>
 
@@ -128,16 +130,24 @@
         $schedule_data = [];
         if ($id_personne_a_afficher) { // S'assurer qu'on a un ID valide pour la requête
             try {
-                // Requête pour récupérer les programmes de la personne sélectionnée
+                // REQUÊTE MODIFIÉE : Jointure avec program_assignments et schools pour obtenir les noms assignés
+                // STRING_AGG est la fonction PostgreSQL équivalente à GROUP_CONCAT en MySQL
                 $stmt_select_schedule = $pdo->prepare(
-                    "SELECT jours, cours, heure FROM week_schedule WHERE id_school = :id_school ORDER BY jours, heure"
+                    "SELECT ws.id_week, ws.jours, ws.cours, ws.heure,
+                            STRING_AGG(s.nom_prenom, ', ') AS assigned_people_names
+                     FROM week_schedule ws
+                     JOIN program_assignments pa ON ws.id_week = pa.id_week
+                     JOIN schools s ON pa.id_school = s.id_school
+                     WHERE pa.id_school = :id_school -- Filtre par la personne sélectionnée
+                     GROUP BY ws.id_week, ws.jours, ws.cours, ws.heure
+                     ORDER BY ws.jours, ws.heure"
                 );
                 $stmt_select_schedule->bindParam(':id_school', $id_personne_a_afficher, PDO::PARAM_INT);
                 $stmt_select_schedule->execute();
                 $schedule_data = $stmt_select_schedule->fetchAll(PDO::FETCH_ASSOC);
             } catch (PDOException $e) {
-                echo "<p style='color: red;'>Erreur lors de la récupération du calendrier : " . $e->getMessage() . "</p>";
-                error_log("Erreur de récupération calendrier pour ID " . $id_personne_a_afficher . ": " . $e->getMessage());
+                echo "<p style='color: red;'>Erreur lors de la récupération du calendrier : " . htmlspecialchars($e->getMessage()) . "</p>";
+                error_log("Erreur de récupération calendrier pour ID " . ($id_personne_a_afficher ?? 'N/A') . ": " . $e->getMessage());
             }
         }
         ?>
@@ -145,10 +155,10 @@
         <table border="1">
             <thead>
                 <tr>
-                    <th>Jours</th>
+                    <th>Jour</th>
                     <th>Cours</th>
                     <th>Heure</th>
-                </tr>
+                    <th>Assigné(s) à</th> </tr>
             </thead>
             <tbody>
                 <?php if (!empty($schedule_data)) {
@@ -157,10 +167,10 @@
                             <td><?= htmlspecialchars($row['jours']) ?></td>
                             <td><?= htmlspecialchars($row['cours']) ?></td>
                             <td><?= htmlspecialchars($row['heure']) ?></td>
-                        </tr>
+                            <td><?= htmlspecialchars($row['assigned_people_names']) ?></td> </tr>
                     <?php }
                 } else { ?>
-                    <tr><td colspan="3">Aucun programme trouvé pour cette personne.</td></tr>
+                    <tr><td colspan="4">Aucun programme trouvé pour cette personne.</td></tr>
                 <?php } ?>
             </tbody>
         </table>

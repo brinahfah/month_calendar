@@ -1,26 +1,24 @@
 <?php
 session_start();
-require_once 'db_connexion.php'; // Pour la connexion $pdo
-require_once 'requete_ajout.php';         // Pour la fonction ajouterProgrammeSemaine
+require_once 'db_connexion.php';
+require_once 'requete.php';
 
-// Annotation PHPDoc pour aider l'éditeur à reconnaître $pdo
 /** @var PDO $pdo */
 
 // Sécurité : Rediriger si l'utilisateur n'est pas admin ou non connecté
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || !isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
-    header("Location: unauthorized.php"); // Assure-toi d'avoir une page unauthorized.php
+    header("Location: unauthorized.php");
     exit();
 }
 
 // Récupérer la liste des personnes (écoles) pour le champ de sélection
 $personnes_list = [];
 try {
-    // Sélectionne id_school et nom_prenom de la table schools
     $stmt_personnes = $pdo->query("SELECT id_school, nom_prenom FROM schools ORDER BY nom_prenom");
     $personnes_list = $stmt_personnes->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     error_log("Erreur lors de la récupération des personnes : " . $e->getMessage());
-    echo "<p class='message error'>Impossible de charger la liste des personnes pour l'assignation.</p>";
+    echo "<p class='message error'>Impossible de charger la liste des personnes.</p>";
 }
 ?>
 <!DOCTYPE html>
@@ -28,10 +26,10 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajouter un Programme Spécifique</title>
+    <title>Ajouter un Programme</title>
     <link rel="stylesheet" href="tableaux.css">
     <style>
-        /* Styles pour le formulaire (tu peux les déplacer dans tableaux.css si tu préfères) */
+        /* Styles pour le formulaire */
         form {
             background-color: #f9f9f9;
             padding: 20px;
@@ -47,14 +45,17 @@ try {
         }
         form input[type="text"],
         form input[type="time"],
-        form input[type="number"],
-        form select {
+        form select { /* Pas de input[type="number"] pour id_week */
             width: calc(100% - 22px);
             padding: 10px;
             margin-bottom: 15px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            box-sizing: border-box; /* Inclure le padding et le border dans la largeur */
+            box-sizing: border-box;
+        }
+        form select[multiple] { /* Style spécifique pour le select multiple */
+            height: 100px; /* Hauteur pour afficher plusieurs options */
+            padding: 5px;
         }
         form button {
             background-color: #28a745;
@@ -87,58 +88,57 @@ try {
 </head>
 <body>
     <div class="main">
-        <h1>Ajouter un Programme Spécifique au Calendrier</h1>
+        <h1>Ajouter un Programme au Calendrier</h1>
 
         <?php
         // Traitement du formulaire lorsque des données sont envoyées en POST
         if ($_SERVER['REQUEST_METHOD'] == "POST") {
-            // Nettoyage et validation des entrées utilisateur
+            // Nettoyage des entrées utilisateur
             $jour_saisi = trim($_POST['jours']);
             $cours_saisi = trim($_POST['cours']);
             $heure_saisi = trim($_POST['heure']);
-            $id_week_saisi = filter_var(trim($_POST['id_week']), FILTER_VALIDATE_INT);
-            $id_school_selectionne = filter_var(trim($_POST['id_school_assign']), FILTER_VALIDATE_INT); // Récupération de l'ID de la personne sélectionnée
 
-            // Validation de base : s'assurer que tous les champs sont remplis et valides
-            if (empty($jour_saisi) || empty($cours_saisi) || empty($heure_saisi) ||
-                $id_week_saisi === false || $id_week_saisi <= 0 ||
-                $id_school_selectionne === false || $id_school_selectionne <= 0) {
-                echo "<p class='message error'>Veuillez remplir tous les champs correctement et sélectionner une personne valide.</p>";
+            // Récupération des IDs des personnes sélectionnées (sera un tableau)
+            $id_schools_selectionnes = $_POST['id_school_assign'] ?? []; // Récupère un tableau
+
+            // Validation de base
+            // Vérifier si $id_schools_selectionnes est bien un tableau et non vide
+            if (empty($jour_saisi) || empty($cours_saisi) || empty($heure_saisi) || !is_array($id_schools_selectionnes) || empty($id_schools_selectionnes)) {
+                echo "<p class='message error'>Veuillez remplir tous les champs et sélectionner au moins une personne.</p>";
+            } elseif (count($id_schools_selectionnes) > 3) { // Limite à 3 personnes
+                echo "<p class='message error'>Vous ne pouvez sélectionner qu'un maximum de 3 personnes.</p>";
             } else {
-                // APPEL DE LA FONCTION AVEC TOUS LES PARAMÈTRES, Y COMPRIS L'ID DE LA PERSONNE
-                if (ajouterProgrammeSemaine($pdo, $jour_saisi, $cours_saisi, $heure_saisi, $id_week_saisi, $id_school_selectionne)) {
-                    // Optionnel : retrouver le nom de la personne pour l'afficher dans le message de succès
-                    $nom_personne_ajoute = "la personne sélectionnée";
-                    foreach ($personnes_list as $p) {
-                        if ($p['id_school'] == $id_school_selectionne) {
-                            $nom_personne_ajoute = htmlspecialchars($p['nom_prenom']);
-                            break;
-                        }
-                    }
-                    echo "<p class='message success'>Le programme a été ajouté avec succès pour **" . $nom_personne_ajoute . "** !</p>";
+                // Filtrer les IDs pour s'assurer qu'ils sont des entiers valides
+                $valid_id_schools = array_filter($id_schools_selectionnes, function($id) {
+                    return filter_var($id, FILTER_VALIDATE_INT) !== false && $id > 0;
+                });
+
+                if (empty($valid_id_schools)) {
+                    echo "<p class='message error'>Les IDs des personnes sélectionnées sont invalides.</p>";
                 } else {
-                    echo "<p class='message error'>Erreur lors de l'ajout du programme. Veuillez réessayer.</p>";
+                    try {
+                        // APPEL DE LA FONCTION AVEC LE TABLEAU D'IDS
+                        if (ajouterProgrammeSemaine($pdo, $jour_saisi, $cours_saisi, $heure_saisi, $valid_id_schools)) {
+                            $noms_assignes = [];
+                            foreach ($personnes_list as $p) {
+                                if (in_array($p['id_school'], $valid_id_schools)) {
+                                    $noms_assignes[] = htmlspecialchars($p['nom_prenom']);
+                                }
+                            }
+                            $message_status = "<p class='message success'>Le programme a été ajouté avec succès pour : **" . implode(", ", $noms_assignes) . "** !</p>";
+                        } else {
+                            $message_status = "<p class='message error'>Erreur lors de l'ajout du programme. Veuillez réessayer.</p>";
+                        }
+                    } catch (PDOException $e) {
+                        $message_status = "<p class='message error'>Erreur de base de données : " . htmlspecialchars($e->getMessage()) . "</p>";
+                        error_log("PDOException in ajouter.php: " . $e->getMessage());
+                    }
                 }
             }
         }
         ?>
 
         <form action="ajouter.php" method="post">
-
-         <label for="id_school_assign">Assigner ce programme à :</label>
-            <select id="id_school_assign" name="id_school_assign" required>
-                <option value="">-- Sélectionnez une personne --</option>
-                <?php
-                if (!empty($personnes_list)) {
-                    foreach ($personnes_list as $personne) {
-                        echo '<option value="' . htmlspecialchars($personne['id_school']) . '">' . htmlspecialchars($personne['nom_prenom']) . '</option>';
-                    }
-                } else {
-                    echo '<option value="">Aucune personne trouvée</option>';
-                }
-                ?>
-            </select>
-
             <label for="jours">Jour :</label>
             <select id="jours" name="jours" required>
                 <option value="">Sélectionnez un jour</option>
@@ -157,13 +157,23 @@ try {
             <label for="heure">Heure :</label>
             <input type="time" id="heure" name="heure" required>
 
-            
+            <label for="id_school_assign">Assigner ce programme à (max 3) :</label>
+            <select id="id_school_assign" name="id_school_assign[]" multiple required> <?php
+                if (!empty($personnes_list)) {
+                    foreach ($personnes_list as $personne) {
+                        echo '<option value="' . htmlspecialchars($personne['id_school']) . '">' . htmlspecialchars($personne['nom_prenom']) . '</option>';
+                    }
+                } else {
+                    echo '<option value="">Aucune personne trouvée</option>';
+                }
+                ?>
+            </select>
+            <small>Maintenez Ctrl (ou Cmd sur Mac) pour sélectionner plusieurs personnes.</small>
 
-           
             <button type="submit">Ajouter au Calendrier</button>
         </form>
 
-        <a href="calendar.php"><button>Retour à l'accueil</button></a>
+        <p><a href="calendar.php">Retour à l'accueil</a></p>
     </div>
 </body>
 </html>
