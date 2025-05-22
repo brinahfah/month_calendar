@@ -157,7 +157,7 @@ try {
         <p><a href="calendar.php" class="action-button">Retour à l'accueil</a></p>
     </div>
 
-    <script>
+   <script>
         document.addEventListener('DOMContentLoaded', function() {
             const deleteButtons = document.querySelectorAll('.delete-button');
             const messageContainer = document.querySelector('.main');
@@ -167,7 +167,8 @@ try {
                     const programId = this.dataset.id;
                     
                     if (confirm(`Êtes-vous sûr de vouloir supprimer le programme avec l'ID Semaine: ${programId} ?`)) {
-                        fetch('api_delete_programme.php', { // Appel à la nouvelle API PHP
+                        // MODIFICATION CRUCIALE ICI : changer le nom du fichier dans l'appel fetch
+                        fetch('api_delete_program.php', { // <-- C'EST ICI QU'IL FAUT CHANGER !
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -207,5 +208,6 @@ try {
             });
         });
     </script>
+
 </body>
 </html>
