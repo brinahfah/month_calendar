@@ -1,14 +1,15 @@
 <?php
-// --- LIGNES DE DÉBOGAGE : À RETIRER EN PRODUCTION ! ---
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// --- LIGNES DE DÉBOGAGE : À RETIRER ABSOLUMENT EN PRODUCTION ! ---
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
 // --- FIN LIGNES DE DÉBOGAGE ---
 
 session_start();
-require_once 'db_connexion.php';
-require_once 'requete.php'; // Pour la fonction supprimerProgrammeSemaine
+require_once 'db_connexion.php'; // Pour la connexion $pdo
+require_once 'requete.php'; // Pour les fonctions CRUD (ajouterProgrammeSemaine, supprimerProgrammeSemaine)
 
+// Annotation PHPDoc pour aider l'éditeur à reconnaître $pdo
 /** @var PDO $pdo */
 
 // Sécurité : Rediriger si l'utilisateur n'est pas admin ou non connecté
@@ -20,19 +21,19 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || !isset(
 $message_status = ''; // Pour stocker les messages de succès/erreur
 
 // --- Débogage : Afficher le contenu de la session ---
-echo "<p><strong>Contenu de la session :</strong></p><pre>";
-var_dump($_SESSION);
-echo "</pre>";
-echo "<hr>";
+// echo "<p><strong>Contenu de la session :</strong></p><pre>";
+// var_dump($_SESSION);
+// echo "</pre>";
+// echo "<hr>";
 
 // --- Traitement de la suppression si un ID est reçu via POST (via JS Fetch) ---
-// Ce bloc est géré par api_delete_programme.php, mais on le garde pour la cohérence si tu le soumets directement
+// Ce bloc est géré par api_delete_program.php, mais on le garde pour la cohérence si tu le soumets directement
 if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['action']) && $_POST['action'] == 'delete') {
     // --- Débogage : Afficher les données POST reçues pour la suppression ---
-    echo "<p><strong>Données POST reçues pour suppression :</strong></p><pre>";
-    var_dump($_POST);
-    echo "</pre>";
-    echo "<hr>";
+    // echo "<p><strong>Données POST reçues pour suppression :</strong></p><pre>";
+    // var_dump($_POST);
+    // echo "</pre>";
+    // echo "<hr>";
 
     $id_programme_a_supprimer = filter_var($_POST['id_programme'], FILTER_VALIDATE_INT);
 
@@ -45,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['action']) && $_POST['a
             }
         } catch (PDOException $e) {
             $message_status = "<p class='message error'>Erreur de base de données lors de la suppression : " . htmlspecialchars($e->getMessage()) . "</p>";
-            error_log("PDOException in supprimer.php (delete): " . $e->getMessage());
+            error_log("PDOException in supprimer.php (delete): " . $e->getMessage()); // Log l'erreur
         }
     } else {
         $message_status = "<p class='message error'>ID de programme invalide pour la suppression.</p>";
@@ -55,7 +56,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['action']) && $_POST['a
 // --- Récupérer tous les programmes pour l'affichage (avec les noms des personnes assignées) ---
 $all_schedules = [];
 try {
-    // REQUÊTE MODIFIÉE : Jointure avec program_assignments et schools pour obtenir les noms assignés
     $sql_select_query = "SELECT ws.id_week, ws.jours, ws.cours, ws.heure,
                                 STRING_AGG(s.nom_prenom, ', ') AS assigned_people_names
                          FROM week_schedule ws
@@ -64,33 +64,35 @@ try {
                          GROUP BY ws.id_week, ws.jours, ws.cours, ws.heure
                          ORDER BY ws.jours, ws.heure";
 
-    echo "<p><strong>Requête SQL SELECT exécutée :</strong></p><pre>" . htmlspecialchars($sql_select_query) . "</pre><hr>";
+    // --- Débogage : Afficher la requête SQL exécutée ---
+    // echo "<p><strong>Requête SQL SELECT exécutée :</strong></p><pre>" . htmlspecialchars($sql_select_query) . "</pre><hr>";
 
     $stmt_all_schedules = $pdo->prepare($sql_select_query);
-    echo "<p><strong>Statement PDO préparé :</strong></p><pre>";
-    var_dump($stmt_all_schedules);
-    echo "</pre><hr>";
+    // echo "<p><strong>Statement PDO préparé :</strong></p><pre>";
+    // var_dump($stmt_all_schedules);
+    // echo "</pre><hr>";
 
     $execute_success = $stmt_all_schedules->execute();
-    echo "<p><strong>Exécution du statement réussie ? </strong>" . ($execute_success ? 'Oui' : 'Non') . "</p><hr>";
+    // echo "<p><strong>Exécution du statement réussie ? </strong>" . ($execute_success ? 'Oui' : 'Non') . "</p><hr>";
 
     if ($execute_success) {
         $all_schedules = $stmt_all_schedules->fetchAll(PDO::FETCH_ASSOC);
     } else {
         $error_info = $stmt_all_schedules->errorInfo();
-        echo "<p style='color: red; font-weight: bold;'>ERREUR D'EXÉCUTION DU SELECT :</p>";
-        echo "<p style='color: red;'>Code SQLSTATE : " . htmlspecialchars($error_info[0]) . "</p>";
-        echo "<p style='color: red;'>Code d'erreur pilote : " . htmlspecialchars($error_info[1]) . "</p>";
-        echo "<p style='color: red;'>Message d'erreur pilote : " . htmlspecialchars($error_info[2]) . "</p>";
+        // Ces messages ne devraient normalement pas s'afficher si PDO est en mode exception
+        // echo "<p style='color: red; font-weight: bold;'>ERREUR D'EXÉCUTION DU SELECT :</p>";
+        // echo "<p style='color: red;'>Code SQLSTATE : " . htmlspecialchars($error_info[0]) . "</p>";
+        // echo "<p style='color: red;'>Code d'erreur pilote : " . htmlspecialchars($error_info[1]) . "</p>";
+        // echo "<p style='color: red;'>Message d'erreur pilote : " . htmlspecialchars($error_info[2]) . "</p>";
         error_log("Erreur d'exécution du SELECT dans supprimer.php: " . implode(" | ", $error_info));
         $message_status .= "<p class='message error'>Erreur lors du chargement des programmes: " . htmlspecialchars($error_info[2]) . "</p>";
     }
 
     // --- Débogage : Afficher les données récupérées de la DB ---
-    echo "<p><strong>Données récupérées de week_schedule :</strong></p><pre>";
-    var_dump($all_schedules);
-    echo "</pre>";
-    echo "<hr>";
+    // echo "<p><strong>Données récupérées de week_schedule :</strong></p><pre>";
+    // var_dump($all_schedules);
+    // echo "</pre>";
+    // echo "<hr>";
 
 } catch (PDOException $e) {
     error_log("Erreur lors de la récupération de tous les programmes : " . $e->getMessage());
@@ -132,7 +134,8 @@ try {
                         <th>Jour</th>
                         <th>Cours</th>
                         <th>Heure</th>
-                        <th>Assigné(s) à</th> <th>Action</th>
+                        <th>Assigné(s) à</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -142,7 +145,8 @@ try {
                             <td><?= htmlspecialchars($programme['jours']) ?></td>
                             <td><?= htmlspecialchars($programme['cours']) ?></td>
                             <td><?= htmlspecialchars($programme['heure']) ?></td>
-                            <td><?= htmlspecialchars($programme['assigned_people_names'] ?? 'Non assigné') ?></td> <td>
+                            <td><?= htmlspecialchars($programme['assigned_people_names'] ?? 'Non assigné') ?></td>
+                            <td>
                                 <button type="button" class="delete-button" data-id="<?= htmlspecialchars($programme['id_week']) ?>">Supprimer</button>
                             </td>
                         </tr>
@@ -157,7 +161,7 @@ try {
         <p><a href="calendar.php" class="action-button">Retour à l'accueil</a></p>
     </div>
 
-   <script>
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             const deleteButtons = document.querySelectorAll('.delete-button');
             const messageContainer = document.querySelector('.main');
@@ -167,8 +171,7 @@ try {
                     const programId = this.dataset.id;
                     
                     if (confirm(`Êtes-vous sûr de vouloir supprimer le programme avec l'ID Semaine: ${programId} ?`)) {
-                        // MODIFICATION CRUCIALE ICI : changer le nom du fichier dans l'appel fetch
-                        fetch('api_delete_program.php', { // <-- C'EST ICI QU'IL FAUT CHANGER !
+                        fetch('api_delete_program.php', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -208,6 +211,5 @@ try {
             });
         });
     </script>
-
 </body>
 </html>
