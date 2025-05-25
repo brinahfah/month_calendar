@@ -30,11 +30,11 @@
             // header("Location: login.php");
             // exit();
         }
-        ?>
+        
 
        
 
-        <?php
+        
         // Vérifie si l'utilisateur est connecté ET s'il a le rôle "admin"
         if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true && isset($_SESSION['role']) && $_SESSION['role'] == "admin") {
         ?>
