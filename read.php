@@ -175,7 +175,7 @@
             </tbody>
         </table>
 
-         <href="calendar.php"><button>Retour à l'accueil</button></a>
+        <p><a href="calendar.php" class="action-button">Retour à l'accueil</a></p>
     </div>
 </body>
 </html>

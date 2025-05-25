@@ -93,46 +93,5 @@ function supprimerProgrammeSemaine(PDO $pdo, int $id_programme): bool
     }
 }
 
-/**
- * Supprime un programme de la table week_schedule par son ID unique (id_week)
- * et toutes ses assignations associées dans program_assignments.
- *
- * @param PDO $pdo L'objet PDO de connexion à la base de données.
- * @param string $profession La profession des personnes stockés dans la base de données.
- * @param array $id_school L'ID unique de la table schools (qui est id_school).
- * @return bool True si les données sont stockés dans la base de donnée réussit, False sinon.
- */
-
- function profession(PDO $pdo, string $profession, array $id_school): bool
-{
-    try {
-        $pdo->beginTransaction(); // Démarre une transaction pour l'insertion
-
-        // 1. Insertion dans la table occupation
-        $stmt_insert = $pdo->prepare(
-            "INSERT INTO occupation (profession, id_school)
-             VALUES (:profession, :id_school)"
-        );
-
-        foreach ($id_school as $id) {
-            // Assurez-vous que l'ID de l'école est un entier valide
-            $valid_id_school = filter_var($id, FILTER_VALIDATE_INT);
-            if ($valid_id_school === false || $valid_id_school <= 0) {
-                throw new PDOException("ID d'école invalide fourni pour l'occupation : " . $id);
-            }
-            $stmt_insert->bindParam(':profession', $profession, PDO::PARAM_STR);
-            $stmt_insert->bindParam(':id_school', $valid_id_school, PDO::PARAM_INT);
-            $stmt_insert->execute();
-        }
-
-        $pdo->commit(); // Valide la transaction
-        return true; // Tout a réussi
-    } catch (PDOException $e) {
-        $pdo->rollBack(); // Annule la transaction en cas d'erreur
-        error_log("Erreur d'insertion dans occupation: " . $e->getMessage());
-        throw $e; // Relance l'exception
-    }
-}
-
 
 ?>
