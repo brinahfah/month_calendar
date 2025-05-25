@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         try{
             
         $stmt = $pdo->prepare("SELECT id_school, nom_prenom, password FROM schools WHERE email = :email");
-        $stmt->bindParam(':email', $email_saisi); // CORRECTION : Utilisez $email_saisi ici !
+        $stmt->bindParam(':email', $email_saisi);
         $stmt->execute();
         $user = $stmt->fetch(PDO::FETCH_ASSOC); // J'ai renommé $result en $user, c'est plus clair
 

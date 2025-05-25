@@ -42,6 +42,7 @@
             <a href="supprimer.php"><button>supprimer</button></a> 
             <a href="create.php"><button>Créer</button></a>
             <a href="read.php"><button>Voir le calendrier</button></a> 
+             <a href="list_school.php"><button>Voir la liste</button></a> 
         <?php
         } else {
             // Bouton pour les utilisateurs non-admin (ou non connectés)

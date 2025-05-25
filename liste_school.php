@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendrier de la Semaine</title>
+    <title>Liste de profession</title>
     <link rel="stylesheet" href="tableaux.css">
     <style>
         /* Styles pour le tableau du calendrier */
@@ -50,9 +50,9 @@
 <body>
     <div class="main">
         <?php
-        ini_set('display_errors', 1);
-        ini_set('display_startup_errors', 1);
-        error_reporting(E_ALL);
+        //ini_set('display_errors', 1);
+        //ini_set('display_startup_errors', 1);
+        //error_reporting(E_ALL);
         session_start();
         require_once 'db_connexion.php';
 
@@ -113,15 +113,12 @@
             <div class="filter-section">
                 <form action="read.php" method="get">
                     <label for="filter_person">Filtrer par personne :</label>
-                    <select id="filter_person" name="id_personne" onchange="this.form.submit()">
-                        <option value="">-- Sélectionnez --</option>
                         <?php foreach ($personnes_list as $personne) { ?>
                             <option value="<?= htmlspecialchars($personne['id_school']) ?>"
                                 <?= ($id_personne_a_afficher == $personne['id_school']) ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($personne['nom_prenom']) ?>
                             </option>
                         <?php } ?>
-                    </select>
                 </form>
             </div>
         <?php } ?>
@@ -133,14 +130,14 @@
                 // REQUÊTE MODIFIÉE : Jointure avec program_assignments et schools pour obtenir les noms assignés
                 // STRING_AGG est la fonction PostgreSQL équivalente à GROUP_CONCAT en MySQL
                 $stmt_select_schedule = $pdo->prepare(
-                    "SELECT ws.id_week, ws.jours, ws.cours, ws.heure,
-                            STRING_AGG(s.nom_prenom, ', ') AS assigned_people_names
-                     FROM week_schedule ws
-                     JOIN program_assignments pa ON ws.id_week = pa.id_week
-                     JOIN schools s ON pa.id_school = s.id_school
-                     WHERE pa.id_school = :id_school -- Filtre par la personne sélectionnée
-                     GROUP BY ws.id_week, ws.jours, ws.cours, ws.heure
-                     ORDER BY ws.jours, ws.heure"
+                    "SELECT 
+                                s.nom_prenom, 
+                                s.email as mail,
+                                o.profession as role
+                            from 
+                                schools as s
+                            inner join 
+                                occupation as o on s.id_school = o.id_school;"
                 );
                 $stmt_select_schedule->bindParam(':id_school', $id_personne_a_afficher, PDO::PARAM_INT);
                 $stmt_select_schedule->execute();
@@ -155,27 +152,28 @@
         <table border="1">
             <thead>
                 <tr>
-                    <th>Jour</th>
-                    <th>Cours</th>
-                    <th>Heure</th>
-                    <th>Assigné(s) à</th> </tr>
+                    <th>Nom_Prenom</th>
+                    <th>Email</th>
+                    <th>Profession</th>
+                   
+        
             </thead>
             <tbody>
                 <?php if (!empty($schedule_data)) {
                     foreach ($schedule_data as $row) { ?>
                         <tr>
-                            <td><?= htmlspecialchars($row['jours']) ?></td>
-                            <td><?= htmlspecialchars($row['cours']) ?></td>
-                            <td><?= htmlspecialchars($row['heure']) ?></td>
-                            <td><?= htmlspecialchars($row['assigned_people_names']) ?></td> </tr>
+                            <td><?= htmlspecialchars($row['nom_prenom']) ?></td>
+                            <td><?= htmlspecialchars($row['email']) ?></td>
+                            <td><?= htmlspecialchars($row['profession']) ?></td>
+                            
                     <?php }
                 } else { ?>
-                    <tr><td colspan="4">Aucun programme trouvé pour cette personne.</td></tr>
+                    <tr><td colspan="4">Cette personne n'est pas sur la liste.</td></tr>
                 <?php } ?>
             </tbody>
         </table>
 
-         <href="calendar.php"><button>Retour à l'accueil</button></a>
+        < href="calendar.php"><button>Retour à l'accueil</button></a>
     </div>
 </body>
 </html>
