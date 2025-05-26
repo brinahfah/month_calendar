@@ -16,17 +16,18 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         $stmt = $pdo->prepare("SELECT id_school, nom_prenom, password FROM schools WHERE email = :email");
         $stmt->bindParam(':email', $email_saisi);
         $stmt->execute();
-        $user = $stmt->fetch(PDO::FETCH_ASSOC); // J'ai renommé $result en $user, c'est plus clair
+        $user = $stmt->fetch(PDO::FETCH_ASSOC); 
 
         // Important : Vérifier si un utilisateur a été trouvé ET si le mot de passe correspond.
-        // Utilisez password_verify() pour les mots de passe hachés.
+        
         if ($user && $motdepasse_saisi == $user['password']) { 
 
             // STOCKER LES INFORMATIONS DE L'UTILISATEUR DANS LA SESSION
                 $_SESSION['id_school'] = $user["id_school"];
-                $_SESSION['nom_prenom'] = $user["nom_prenom"]; // <-- C'EST CETTE LIGNE QUI VA STOCKER LE NOM
+                $_SESSION['nom_prenom'] = $user["nom_prenom"]; // 
                 $_SESSION['logged_in'] = true; // Une variable pour confirmer que l'utilisateur est connecté
-                $_SESSION['role'] = $user["titre"]; // Stocke l'email dans la session
+                $_SESSION['role'] = $user["titre"]; 
+                
                  // >>> DEUXIÈME REQUÊTE : Récupérer le rôle (titre) depuis la table occupation <<<
                 $stmt_role = $pdo->prepare("SELECT titre FROM occupation WHERE id_school = :id_school");
                 $stmt_role->bindParam(':id_school', $user["id_school"]); // Utilisez l'id_school de l'utilisateur connecté
@@ -49,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         } else {
             echo "<script>alert('Email ou mot de passe incorrect');</script>";
             // Pas besoin de exit() ici, le script se terminera naturellement.
-            header("Location: index.html");
+            header("Location: index.php");
             exit();
         }
       
