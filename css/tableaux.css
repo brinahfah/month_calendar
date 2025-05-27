@@ -1,0 +1,198 @@
+ body {
+            background-color: #4169E1; /* Bleu Roi */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 20px; /* Ajouter un peu de padding pour éviter que le contenu ne colle aux bords */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Aligner en haut pour laisser la page défiler si le contenu est long */
+            min-height: 100vh;
+            overflow: hidden; /* Empêche le défilement de la page */
+        }
+
+        /* Conteneur principal */
+        .main {
+            background-color: #ffffff; /* Fond blanc */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Ombre douce */
+            max-width: 900px; /* Largeur maximale pour le contenu */
+            width: 100%; /* S'adapte à la taille de l'écran */
+            box-sizing: border-box; /* Inclure padding et border dans la largeur/hauteur */
+        }
+
+        /* Titre */
+        .main h1 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 2em;
+            text-align: center;
+            border-bottom: 2px solid #4169E1;
+            padding-bottom: 10px;
+        }
+
+        /* Message d'erreur/information */
+        .main p {
+            color: #555;
+            line-height: 1.6;
+            font-size: 1.1em;
+            text-align: center;
+        }
+        .main p a {
+            color: #ffffff;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .main p a:hover {
+            text-decoration: underline;
+        }
+        .main p[style*="color: red"] { /* Pour les messages d'erreur PHP */
+            font-weight: bold;
+        }
+
+        /* Section de filtre (pour admin) */
+        .filter-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: #f0f8ff; /* Bleu très clair */
+            border-radius: 8px;
+            border: 1px solid #cceeff; /* Bordure légère */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap; /* Permet aux éléments de passer à la ligne si l'écran est petit */
+            gap: 15px; /* Espacement entre les éléments du filtre */
+        }
+        .filter-section label {
+            font-weight: bold;
+            color: #333;
+        }
+        .filter-section select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            min-width: 180px;
+        }
+
+        /* Styles pour le tableau du calendrier */
+        table {
+            width: 100%;
+            border-collapse: collapse; /* Supprime les doubles bordures */
+            margin-top: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Ombre légère pour le tableau */
+            border-radius: 8px;
+            overflow: hidden; /* Assure que les coins arrondis s'appliquent */
+        }
+        th, td {
+            border: 1px solid #e0e0e0; /* Bordures très fines et claires */
+            padding: 12px 15px; /* Plus de padding pour une meilleure lisibilité */
+            text-align: left;
+        }
+        th {
+            background-color: #e6e6e6; /* Gris clair pour les en-têtes (style Excel) */
+            color: #333;
+            font-weight: bold;
+            text-transform: uppercase; /* Texte en majuscules pour les en-têtes */
+            font-size: 0.95em;
+        }
+        /* Styles alternés pour les lignes (style Excel) */
+        tbody tr:nth-child(even) {
+            background-color: #f7f7f7; /* Gris très clair pour les lignes paires */
+        }
+        tbody tr:hover {
+            background-color: #eef; /* Léger surlignage bleu au survol */
+        }
+        /* Style pour le message "Aucun programme trouvé" */
+        tbody tr td[colspan="4"] {
+            text-align: center;
+            font-style: italic;
+            color: #777;
+            padding: 20px;
+        }
+
+        /* Bouton "Retour à l'accueil" */
+        .action-button {
+            display: inline-block;
+            padding: 12px 25px;
+            margin-top: 30px; /* Espace au-dessus du bouton */
+            background-color: #007bff; /* Bleu standard */
+            color: white;
+            text-decoration: none;
+            border-radius: 25px; /* Bords arrondis comme sur l'accueil */
+            border: none;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-align: center; /* Centrer le texte si le bouton est en bloc */
+        }
+        .action-button:hover {
+            background-color: #0056b3; /* Bleu plus foncé au survol */
+            transform: translateY(-2px); /* Léger soulèvement */
+        }
+
+        /* Media Queries pour la responsivité */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .main {
+                padding: 20px;
+            }
+            .main h1 {
+                font-size: 1.6em;
+            }
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 15px;
+                gap: 10px;
+            }
+            .filter-section select {
+                width: 100%; /* Le select prend toute la largeur */
+                min-width: unset; /* Supprime le min-width */
+            }
+            table, thead, tbody, th, td, tr {
+                display: block; /* Force les éléments du tableau à être des blocs */
+            }
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px; /* Cache les en-têtes du tableau sur mobile */
+            }
+            tr {
+                border: 1px solid #ccc;
+                margin-bottom: 15px;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+            }
+            td {
+                border: none;
+                border-bottom: 1px solid #eee; /* Bordure entre les cellules sur mobile */
+                position: relative;
+                padding-left: 50%; /* Espace pour le pseudo-élément */
+                text-align: right;
+            }
+            td:last-child {
+                border-bottom: 0;
+            }
+            td:before { /* Crée un pseudo-élément pour afficher l'en-tête de colonne */
+                content: attr(data-label); /* Récupère le texte de l'attribut data-label */
+                position: absolute;
+                left: 10px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: bold;
+                color: #555;
+            }
+            .action-button {
+                width: calc(100% - 20px); /* Ajuste la largeur du bouton */
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }

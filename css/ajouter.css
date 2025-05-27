@@ -1,0 +1,158 @@
+/* Styles généraux pour le corps de la page ajouter.php */
+body {
+    background-color: #4169E1;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Aligner en haut */
+    min-height: 100vh;
+}
+
+/* Conteneur principal pour la page d'ajout */
+.main-add { /* Nouvelle classe pour le conteneur principal d'ajout */
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Ombre plus légère */
+    max-width: 600px; /* Moins large que le calendrier */
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center; /* Centrer le contenu à l'intérieur */
+}
+
+/* Titre */
+.main-add h1 {
+    color: #2c3e50;
+    margin-bottom: 25px;
+    font-size: 2.2em; /* Un peu plus grand */
+    text-align: center;
+    border-bottom: 2px solid #6c757d; /* Ligne grise sous le titre */
+    padding-bottom: 10px;
+}
+
+/* Styles pour les formulaires */
+.form-group {
+    margin-bottom: 20px; /* Espace entre les champs */
+    text-align: left; /* Alignement du texte à gauche pour les labels */
+}
+
+.form-group label {
+    display: block; /* Chaque label sur une nouvelle ligne */
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #495057; /* Gris foncé pour les labels */
+}
+
+.form-group input[type="text"],
+.form-group input[type="time"],
+.form-group select,
+.form-group textarea {
+    width: calc(100% - 22px); /* Pleine largeur avec padding */
+    padding: 10px;
+    border: 1px solid #ced4da; /* Bordure douce */
+    border-radius: 5px;
+    font-size: 1em;
+    box-sizing: border-box; /* Inclure padding et border dans la largeur */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="time"]:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #80bdff; /* Bordure bleue au focus */
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Ombre légère au focus */
+    outline: none; /* Supprime le contour par défaut du navigateur */
+}
+
+/* Boutons spécifiques à ajouter.php */
+.submit-button {
+    display: inline-block;
+    padding: 12px 30px;
+    margin-top: 25px;
+    background-color: #28a745; /* Vert pour "Ajouter" */
+    color: white;
+    text-decoration: none;
+    border-radius: 8px; /* Bords légèrement arrondis */
+    border: none;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.25); /* Ombre plus verte */
+}
+
+.submit-button:hover {
+    background-color: #218838; /* Vert plus foncé au survol */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(40, 167, 69, 0.35);
+}
+
+.submit-button:active {
+    background-color: #1e7e34;
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(40, 167, 69, 0.2);
+}
+
+.action-button {
+    display: inline-block;
+    padding: 12px 30px;
+    margin-top: 25px;
+    margin-left: 15px; /* Espacement si à côté du bouton submit */
+    background-color: #6c757d; /* Gris pour "Annuler" */
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 10px rgba(108, 117, 125, 0.25);
+}
+
+.action-button:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(108, 117, 125, 0.35);
+}
+
+.cancel-button:active {
+    background-color: #545b62;
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(108, 117, 125, 0.2);
+}
+
+/* Media Queries pour la responsivité */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    .main-add {
+        padding: 20px;
+        border-radius: 5px;
+    }
+    .main-add h1 {
+        font-size: 1.8em;
+    }
+    .form-group input[type="text"],
+    .form-group input[type="time"],
+    .form-group select,
+    .form-group textarea {
+        width: 100%; /* S'assurer que le calcul est juste pour 100% sur mobile */
+        padding: 8px;
+    }
+    .submit-button, .cancel-button {
+        display: block; /* Boutons l'un en dessous de l'autre sur mobile */
+        width: calc(100% - 20px);
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 10px; /* Espace entre les boutons sur mobile */
+    }
+    .cancel-button {
+        margin-left: auto; /* Supprime le margin-left fixe sur mobile */
+    }
+}

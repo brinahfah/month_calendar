@@ -1,0 +1,145 @@
+/* Styles pour le corps de la page */
+        body {
+            background-color: #4169E1; /* Bleu Roi pour le fond */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex; /* Utilise Flexbox pour centrer le conteneur principal */
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* La page prend au moins toute la hauteur de la fenêtre */
+            color: #333; /* Couleur de texte par défaut */
+        }
+
+        /* Conteneur principal qui contient le formulaire et l'image */
+        .container {
+            display: flex; /* Active Flexbox pour aligner l'image et le formulaire côte à côte */
+            background-color: #ffffff; /* Fond blanc pour le conteneur */
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Ombre plus prononcée */
+            overflow: hidden; /* Assure que les coins arrondis s'appliquent aussi aux enfants */
+            max-width: 900px; /* Largeur maximale du conteneur */
+            width: 90%; /* Prend 90% de la largeur disponible sur les écrans plus petits */
+            /* Animation d'apparition */
+            animation: fadeInScale 0.8s ease-out forwards;
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        /* Animation d'apparition du conteneur */
+        @keyframes fadeInScale {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Style pour la section du formulaire */
+        .login {
+            flex: 1; /* Permet au formulaire de prendre la moitié de l'espace */
+            padding: 40px;
+            text-align: center;
+            display: flex; /* Active Flexbox pour les éléments à l'intérieur de login */
+            flex-direction: column; /* Organise les éléments en colonne */
+            justify-content: center; /* Centre verticalement le contenu du formulaire */
+            background-color: #f9f9f9; /* Légère couleur de fond pour le formulaire */
+        }
+
+        /* Style pour le titre du formulaire */
+        .login h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+
+        /* Style pour les labels */
+        .login label {
+            display: block; /* Chaque label sur une nouvelle ligne */
+            text-align: left;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        /* Style pour les champs de saisie */
+        .login input[type="text"],
+        .login input[type="email"],
+        .login input[type="password"] {
+            width: calc(100% - 20px); /* Prend toute la largeur moins le padding */
+            padding: 12px 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .login input[type="text"]:focus,
+        .login input[type="email"]:focus,
+        .login input[type="password"]:focus {
+            border-color: #007bff; /* Bordure bleue au focus */
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.2); /* Ombre légère au focus */
+            outline: none; /* Supprime l'outline par défaut du navigateur */
+        }
+
+        /* Style pour le bouton de soumission */
+        .login button[type="submit"] {
+            background-color: #007bff; /* Bleu standard */
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px; /* Coins arrondis */
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .login button[type="submit"]:hover {
+            background-color: #0056b3; /* Bleu plus foncé au survol */
+            transform: translateY(-2px); /* Léger soulèvement */
+        }
+
+        /* Style pour la section de l'image */
+        .container img {
+            flex: 1; /* Permet à l'image de prendre la moitié de l'espace */
+            width: 100%; /* L'image remplit sa section */
+            height: auto;
+            object-fit: cover; /* Recadre l'image pour couvrir la zone sans la déformer */
+            display: block; /* Supprime l'espace sous l'image */
+            animation: imageSlideIn 1s ease-out forwards;
+            transform: translateX(100%); /* Commence hors de l'écran */
+        }
+
+        /* Animation d'apparition de l'image (glisse depuis la droite) */
+        @keyframes imageSlideIn {
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        /* Media Queries pour la responsivité */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column; /* Empile l'image et le formulaire sur les petits écrans */
+                max-width: 400px;
+            }
+
+            .login {
+                padding: 30px;
+            }
+
+            .login h1 {
+                font-size: 1.8em;
+            }
+
+            .container img {
+                height: 200px; /* Hauteur fixe pour l'image en mode empilé */
+                animation: none; /* Désactive l'animation de slide-in sur mobile si elle est trop longue */
+                transform: none;
+                border-top-left-radius: 10px; /* Coins arrondis pour l'image du haut */
+                border-top-right-radius: 10px;
+                border-bottom-left-radius: 0;
+                border-bottom-right-radius: 0;
+            }
+        }

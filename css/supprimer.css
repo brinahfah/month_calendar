@@ -1,0 +1,200 @@
+/* Styles généraux pour le corps de la page supprimer.php */
+body {
+    background-color: #4169E1; /* Bleu Roi */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Aligner en haut */
+    min-height: 100vh;
+}
+
+/* Conteneur principal pour la page de suppression */
+.main-delete { /* Nouvelle classe pour le conteneur principal de suppression */
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    max-width: 900px; /* Largeur similaire au tableau du calendrier */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Titre */
+.main-delete h1 {
+    color: #dc3545; /* Rouge pour le titre de suppression */
+    margin-bottom: 25px;
+    font-size: 2em;
+    text-align: center;
+    border-bottom: 2px solid #dc3545; /* Ligne rouge sous le titre */
+    padding-bottom: 10px;
+}
+
+/* Messages d'information/avertissement */
+.main-delete p {
+    color: #555;
+    line-height: 1.6;
+    font-size: 1.1em;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.main-delete p strong {
+    color: #dc3545; /* Rouge pour le texte important */
+}
+
+/* Styles pour le tableau de confirmation (Type Excel) */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #fff;
+}
+th, td {
+    border: 1px solid #ddeeee; /* Bordures fines et claires */
+    padding: 12px 15px;
+    text-align: left;
+    font-size: 0.95em;
+}
+th {
+    background-color: #e6e6e6; /* Gris clair pour les en-têtes (style Excel) */
+    color: #333;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+tbody tr:nth-child(even) {
+    background-color: #f7f7f7; /* Gris très clair pour les lignes paires */
+}
+tbody tr:hover {
+    background-color: #ffe0e0; /* Survol légèrement rouge pour indiquer la suppression */
+    transition: background-color 0.2s ease;
+}
+/* Style pour le message si aucun élément trouvé */
+tbody tr td[colspan] {
+    text-align: center;
+    font-style: italic;
+    color: #777;
+    padding: 20px;
+    background-color: #fdfdfd;
+}
+
+/* Bouton de suppression (Rouge) */
+.delete-confirm-button {
+    display: inline-block;
+    padding: 12px 30px;
+    margin-top: 25px;
+    background-color: #dc3545; /* Rouge vif pour la confirmation de suppression */
+    color: white;
+    text-decoration: none;
+    border-radius: 25px; /* Bords très arrondis */
+    border: none;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 10px rgba(220, 53, 69, 0.25); /* Ombre rouge */
+}
+.delete-confirm-button:hover {
+    background-color: #c82333; /* Rouge plus foncé au survol */
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(220, 53, 69, 0.35);
+}
+.delete-confirm-button:active {
+    background-color: #bd2130;
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(220, 53, 69, 0.2);
+}
+
+/* Bouton "Retour à l'accueil" (Bleu) */
+.back-home-button {
+    display: inline-block;
+    padding: 12px 30px;
+    margin-top: 25px;
+    margin-left: 20px; /* Espace entre les deux boutons */
+    background-color: #007bff; /* Bleu standard */
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.25);
+}
+.back-home-button:hover {
+    background-color: #0056b3; /* Bleu plus foncé au survol */
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 123, 255, 0.35);
+}
+.back-home-button:active {
+    background-color: #004085;
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
+}
+
+/* Media Queries pour la responsivité */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    .main-delete {
+        padding: 20px;
+        border-radius: 5px;
+    }
+    .main-delete h1 {
+        font-size: 1.8em;
+    }
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+    thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    tr {
+        border: 1px solid #ccc;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+    }
+    td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 50%;
+        text-align: right;
+    }
+    td:last-child {
+        border-bottom: 0;
+    }
+    td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+        color: #555;
+    }
+    .delete-confirm-button, .back-home-button {
+        display: block; /* Boutons l'un en dessous de l'autre sur mobile */
+        width: calc(100% - 20px);
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 10px; /* Espace entre les boutons */
+    }
+    .back-home-button {
+        margin-left: auto; /* Réinitialise le margin-left fixe sur mobile */
+    }
+}
