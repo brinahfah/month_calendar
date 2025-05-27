@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajouter un nouveau programme</title>
-    <link rel="stylesheet" href="ajouter.css"> </head>
+    <link rel="stylesheet" href="css/ajouter.css">
+</head>
 <body>
-    <div class="main-add"> <h1>Ajouter un nouveau programme</h1>
+    <div class="main-add">
+        <h1>Ajouter un nouveau programme</h1>
 
-        <form action="traitement_ajout.php" method="post"> <div class="form-group">
+        <form action="traitement_ajout.php" method="post"> 
+            <div class="form-group">
                 <label for="jour">Jour de la semaine :</label>
                 <select id="jour" name="jour" required>
                     <option value="">Sélectionnez un jour</option>
@@ -37,10 +40,8 @@
                 <select id="id_personne_assignee" name="id_personne_assignee" required>
                     <option value="">Sélectionnez une personne</option>
                     <?php
-                    // Vous devrez inclure db_connexion.php ici et récupérer la liste des personnes
-                    require_once 'db_connexion.php'; // Incluez db_connexion.php ici
-
-                   
+                    // Inclure db_connexion.php ici si ce n'est pas déjà fait
+                    require_once 'bdd/db_connexion.php'; 
 
                     /** @var PDO $pdo */
                     
@@ -58,8 +59,7 @@
             </div>
 
             <button type="submit" class="submit-button">Ajouter le programme</button>
-           <p><a href="calendar.php" class="action-button">Retour à l'accueil</a></p>
-        </form>
+            </form>
     </div>
 </body>
 </html>
