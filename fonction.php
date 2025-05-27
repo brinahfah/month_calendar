@@ -2,7 +2,7 @@
 session_start();
 
 
-require_once 'db_connexion.php';
+require_once 'bdd/db_connexion.php';
 
  /** @var PDO $pdo */ //
 
