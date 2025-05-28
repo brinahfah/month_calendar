@@ -1,6 +1,9 @@
 <?php
 session_start(); // Assurez-vous que la session est démarrée ici si vous l'utilisez
+
 require_once 'bdd/db_connexion.php'; // Incluez votre fichier de connexion à la base de données
+
+require_once 'requete.php';
 
 /** @var PDO $pdo */ // Pour l'autocomplétion dans certains IDE
 

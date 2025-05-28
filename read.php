@@ -1,146 +1,102 @@
- <?php
+<?php
+session_start(); // Assurez-vous que la session est démarrée
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+require_once 'bdd/db_connexion.php'; // Votre fichier de connexion à la base de données
+// require_once 'requete.php'; // Incluez si vous avez des fonctions de récupération ici
+
+/** @var PDO $pdo */
+
+$is_admin = (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true && isset($_SESSION['role']) && $_SESSION['role'] == "admin");
+$current_user_id = $_SESSION['id_school'] ?? null; // Assurez-vous que l'id_school est stocké en session lors de la connexion
+
+$programmes = [];
+$sql = "SELECT ws.id_week, ws.jours, ws.cours, ws.heure, s.nom_prenom as assigned_to
+        FROM week_schedule ws
+        LEFT JOIN program_assignments pa ON ws.id_week = pa.id_week
+        LEFT JOIN schools s ON pa.id_school = s.id_school";
+$params = [];
+
+if ($is_admin) {
+    // Si l'utilisateur est admin, il ne voit que ses propres programmes
+    $sql .= " WHERE pa.id_school = :user_id";
+    $params[':user_id'] = $current_user_id;
+}
+// else {
+//    // Pour les utilisateurs non-admin (prof, étudiant), vous pouvez choisir:
+//    // - Voir TOUS les programmes (comme avant, pas de clause WHERE)
+//    // - Voir seulement leurs propres programmes (même WHERE que l'admin)
+//    // - Voir les programmes des professeurs (selon leur rôle dans 'schools' si vous avez cette colonne)
+//    // Pour cet exemple, je suppose qu'ils voient TOUS les programmes non-filtrés s'ils ne sont pas admins
+// }
+
+
+$sql .= " ORDER BY ws.jours, ws.heure"; // Ajout d'un ORDER BY pour un affichage cohérent
+
+try {
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $programmes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    error_log("Erreur de récupération des programmes dans read.php: " . $e->getMessage());
+    $error_message = "Erreur lors du chargement des programmes.";
+}
 
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendrier de la Semaine</title>
-    <link rel="stylesheet" href="read.css">
-    
+    <title>Calendrier des Programmes</title>
+    <link rel="stylesheet" href="css/tableaux.css"> 
 </head>
 <body>
     <div class="main">
-        <?php
-      
-       
-        require_once 'db_connexion.php';
-       
-        /** @var PDO $pdo */
+        <h1><?php echo $is_admin ? "Mon Calendrier" : "Calendrier des Programmes"; ?></h1>
 
-        $id_personne_a_afficher = null;
-        $nom_personne_a_afficher = "du calendrier"; // Texte par défaut pour l'affichage
+        <?php if (isset($error_message)): ?>
+            <p style="color: red;"><?= htmlspecialchars($error_message) ?></p>
+        <?php endif; ?>
 
-        // --- Récupérer l'ID de la personne à afficher ---
-        // 1. Si un ID est passé dans l'URL (pour les admins qui veulent filtrer)
-        if (isset($_GET['id_personne']) && is_numeric($_GET['id_personne'])) {
-            $id_personne_a_afficher = (int)$_GET['id_personne'];
-        }
-        // 2. Si aucun ID n'est passé dans l'URL, utiliser l'ID de l'utilisateur connecté
-        elseif (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true && isset($_SESSION['id_school'])) {
-            $id_personne_a_afficher = $_SESSION['id_school'];
-        }
-        // 3. Si aucun ID n'est disponible (non connecté et pas de filtre), rediriger ou afficher un message
-        else {
-            echo "<h1>Veuillez vous connecter ou sélectionner une personne.</h1>";
-            echo "<p>Retour à l'<a href='index.php' class='action-button'>Accueil</a>.</p>"; // Lien corrigé vers index.php
-            exit(); // Arrête l'exécution si pas d'ID à afficher
-        }
+        <?php if (!empty($programmes)): ?>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Jour</th>
+                        <th>Cours</th>
+                        <th>Heure</th>
+                        <th>Assigné à</th>
+                        <?php if ($is_admin): ?>
+                            <th>Actions</th> <?php endif; ?>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($programmes as $programme): ?>
+                    <tr>
+                        <td data-label="Jour"><?= htmlspecialchars($programme['jours']) ?></td>
+                        <td data-label="Cours"><?= htmlspecialchars($programme['cours']) ?></td>
+                        <td data-label="Heure"><?= htmlspecialchars($programme['heure']) ?></td>
+                        <td data-label="Assigné à"><?= htmlspecialchars($programme['assigned_to'] ?: 'Non assigné') ?></td>
+                        <?php if ($is_admin): ?>
+                            <td data-label="Actions">
+                                <a href="modifier.php?id=<?= htmlspecialchars($programme['id_week']) ?>" class="action-button edit-button">Modifier</a>
+                                <a href="supprimer.php?id=<?= htmlspecialchars($programme['id_week']) ?>" class="action-button delete-button">Supprimer</a>
+                            </td>
+                        <?php endif; ?>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php else: ?>
+            <p>Aucun programme trouvé pour l'instant.</p>
+        <?php endif; ?>
 
-        // --- Récupérer le nom de la personne à afficher (pour le titre) ---
-        if ($id_personne_a_afficher) {
-            try {
-                $stmt_nom = $pdo->prepare("SELECT nom_prenom FROM schools WHERE id_school = :id_school");
-                $stmt_nom->bindParam(':id_school', $id_personne_a_afficher, PDO::PARAM_INT);
-                $stmt_nom->execute();
-                $resultat_nom = $stmt_nom->fetch(PDO::FETCH_ASSOC);
-                if ($resultat_nom) {
-                    $nom_personne_a_afficher = htmlspecialchars($resultat_nom['nom_prenom']);
-                } else {
-                    $nom_personne_a_afficher = "Personne inconnue";
-                }
-            } catch (PDOException $e) {
-                error_log("Erreur lors de la récupération du nom : " . $e->getMessage());
-                echo "<p style='color: red;'>Erreur lors de la récupération du nom de la personne.</p>";
-                $nom_personne_a_afficher = "Erreur";
-            }
-        }
-
-        echo "<h1>Calendrier de la Semaine de " . $nom_personne_a_afficher . "</h1>";
-        ?>
-
-        <?php
-        // --- Section de filtre pour les administrateurs ---
-        if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true && isset($_SESSION['role']) && $_SESSION['role'] === "admin") {
-            $personnes_list = [];
-            try {
-                $stmt_personnes = $pdo->query("SELECT id_school, nom_prenom FROM schools ORDER BY nom_prenom");
-                $personnes_list = $stmt_personnes->fetchAll(PDO::FETCH_ASSOC);
-            } catch (PDOException $e) {
-                error_log("Erreur lors de la récupération des personnes : " . $e->getMessage());
-                echo "<p style='color: red;'>Impossible de charger la liste des personnes pour le filtre.</p>";
-            }
-        ?>
-            <div class="filter-section">
-                <form action="read.php" method="get">
-                    <label for="filter_person">Filtrer par personne :</label>
-                    <select id="filter_person" name="id_personne" onchange="this.form.submit()">
-                        <option value="">-- Sélectionnez --</option>
-                        <?php foreach ($personnes_list as $personne) { ?>
-                            <option value="<?= htmlspecialchars($personne['id_school']) ?>"
-                                <?= ($id_personne_a_afficher == $personne['id_school']) ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($personne['nom_prenom']) ?>
-                            </option>
-                        <?php } ?>
-                    </select>
-                </form>
-            </div>
-        <?php } ?>
-
-        <?php
-        $schedule_data = [];
-        if ($id_personne_a_afficher) { // S'assurer qu'on a un ID valide pour la requête
-            try {
-                // REQUÊTE MODIFIÉE : Jointure avec program_assignments et schools pour obtenir les noms assignés
-                // STRING_AGG est la fonction PostgreSQL équivalente à GROUP_CONCAT en MySQL
-                $stmt_select_schedule = $pdo->prepare(
-                    "SELECT ws.id_week, ws.jours, ws.cours, ws.heure,
-                             STRING_AGG(s.nom_prenom, ', ') AS assigned_people_names
-                       FROM week_schedule ws
-                       JOIN program_assignments pa ON ws.id_week = pa.id_week
-                       JOIN schools s ON pa.id_school = s.id_school
-                       WHERE pa.id_school = :id_school -- Filtre par la personne sélectionnée
-                       GROUP BY ws.id_week, ws.jours, ws.cours, ws.heure, ws.id_school -- Ajout de ws.id_school dans GROUP BY pour PostgreSQL si nécessaire
-                       ORDER BY ws.jours, ws.heure"
-                );
-                $stmt_select_schedule->bindParam(':id_school', $id_personne_a_afficher, PDO::PARAM_INT);
-                $stmt_select_schedule->execute();
-                $schedule_data = $stmt_select_schedule->fetchAll(PDO::FETCH_ASSOC);
-            } catch (PDOException $e) {
-                echo "<p style='color: red;'>Erreur lors de la récupération du calendrier : " . htmlspecialchars($e->getMessage()) . "</p>";
-                error_log("Erreur de récupération calendrier pour ID " . ($id_personne_a_afficher ?? 'N/A') . ": " . $e->getMessage());
-            }
-        }
-        ?>
-
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Jour</th>
-                    <th>Cours</th>
-                    <th>Heure</th>
-                    <th>Assigné(s) à</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (!empty($schedule_data)) {
-                    foreach ($schedule_data as $row) { ?>
-                        <tr>
-                            <td data-label="Jour"><?= htmlspecialchars($row['jours']) ?></td>
-                            <td data-label="Cours"><?= htmlspecialchars($row['cours']) ?></td>
-                            <td data-label="Heure"><?= htmlspecialchars($row['heure']) ?></td>
-                            <td data-label="Assigné(s) à"><?= htmlspecialchars($row['assigned_people_names']) ?></td>
-                        </tr>
-                    <?php }
-                } else { ?>
-                    <tr><td colspan="4">Aucun programme trouvé pour cette personne.</td></tr>
-                <?php } ?>
-            </tbody>
-        </table>
-
-        <p><a href="calendar.php" class="action-button">Retour à l'accueil</a></p>
+        <div class="button-container" style="margin-top: 30px;">
+            <a href="calendar.php" class="action-button">Retour à l'accueil</a>
+        </div>
     </div>
 </body>
 </html>
